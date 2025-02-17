@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+nav {
+    background: #333;
+    color: #fff;
+    padding: 1em;
+}
+nav a {
+    color: #fff;
+    margin-right: 1em;
+    text-decoration: none;
+}
+.container {
+    padding: 1em;
+}
+.film-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+}
+.film {
+    border: 1px solid #ccc;
+    padding: 0.5em;
+    width: 200px; /* aumentato di 50px rispetto a 150px */
+    height: 275px; /* aumentato di 50px rispetto a 150px */
+    /* Ensure the container is square */
+    overflow: hidden;
+    text-align: center;
+}
+.film img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.review {
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 1em;
+    padding-bottom: 0.5em;
+}
+.flashes {
+    color: red;
+    list-style: none;
+}

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block title %}Home - Recensioni Film{% endblock %}
+{% block content %}
+<h1>Film in vetrina</h1>
+<div class="film-grid">
+    {% for film in films %}
+    <div class="film">
+        <a href="{{ url_for('film_detail', film_id=film['id']) }}">
+            <img src="{{ url_for('static', filename='favicon/' ~ film['image']) }}" alt="{{ film['title'] }}">
+            <!-- removed film title -->
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
