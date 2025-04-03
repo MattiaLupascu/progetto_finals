@@ -13,6 +13,7 @@ def get_db_connection():
 
 @app.route('/')
 def index():
+    
     conn = get_db_connection()
     films = conn.execute('SELECT * FROM films').fetchall()
     conn.close()
@@ -47,9 +48,12 @@ def register():
             return redirect(url_for('register'))
         conn.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
         conn.commit()
+        new_user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
         conn.close()
-        flash('Registrazione avvenuta con successo, effettua il login')
-        return redirect(url_for('login'))
+        session['user_id'] = new_user['id']
+        session['username'] = new_user['username']
+        flash(f'Registrazione avvenuta con successo, benvenuto {new_user["username"]}')
+        return redirect(url_for('index'))
     return render_template('register.html')
 
 @app.route('/logout')
@@ -68,8 +72,9 @@ def film_detail(film_id):
             flash('Devi essere loggato per scrivere una recensione')
             return redirect(url_for('login'))
         review_text = request.form['review']
+        rating = request.form['rating']
         user_id = session['user_id']
-        conn.execute('INSERT INTO reviews (film_id, user_id, review) VALUES (?, ?, ?)', (film_id, user_id, review_text))
+        conn.execute('INSERT INTO reviews (film_id, user_id, review, rating) VALUES (?, ?, ?, ?)', (film_id, user_id, review_text, rating))
         conn.commit()
         conn.close()
         return redirect(url_for('film_detail', film_id=film_id))
@@ -77,4 +82,4 @@ def film_detail(film_id):
     return render_template('film.html', film=film, reviews=reviews)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=60001)

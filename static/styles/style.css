@@ -45,3 +45,62 @@ nav a {
     color: red;
     list-style: none;
 }
+.rounded-box {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 1em;
+}
+
+.card-img-top {
+    width: 50%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card-img-bottom.layout-img {
+    width: 75%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card-img-bottom.film-img {
+    width: 50%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.small-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.small-card .card-img-top,
+.small-card .card-body {
+    flex: 1;
+}
+
+.small-card .card-body {
+    padding: 0.5rem;
+    overflow: hidden;
+}
+
+.nav-buttons a.btn-nav {
+    display: inline-block;
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-right: 0.5rem;
+    transition: background-color 0.3s;
+}
+
+.nav-buttons a.btn-nav:hover {
+    background-color: #e0e0e0;
+}

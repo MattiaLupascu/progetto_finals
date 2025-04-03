@@ -1,0 +1,10 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "mhanz",
+            "database": "\\\\wsl.localhost\\Ubuntu\\home\\matti\\repository\\progetto_finals\\database.db"
+        }
+    ]
+}

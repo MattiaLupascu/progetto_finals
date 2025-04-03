@@ -1,14 +1,18 @@
 {% extends "layout.html" %}
-{% block title %}Home - Recensioni Film{% endblock %}
+{% block title %}Home - Submarinium{% endblock %}
 {% block content %}
 <h1>Film in vetrina</h1>
-<div class="film-grid">
+<div class="row row-cols-1 row-cols-md-3 g-4">
     {% for film in films %}
-    <div class="film">
-        <a href="{{ url_for('film_detail', film_id=film['id']) }}">
-            <img src="{{ url_for('static', filename='favicon/' ~ film['image']) }}" alt="{{ film['title'] }}">
-            <!-- removed film title -->
-        </a>
+    <div class="col">
+        <div class="card h-100">
+            <a href="{{ url_for('film_detail', film_id=film['id']) }}">
+                <img src="{{ url_for('static', filename='favicon/' ~ film['image']) }}" class="card-img-bottom layout-img" alt="{{ film['title'] }}">
+            </a>
+            <div class="card-body">
+                {# film title rimosso #}
+            </div>
+        </div>
     </div>
     {% endfor %}
 </div>
