@@ -13,11 +13,40 @@ def get_db_connection():
 
 @app.route('/')
 def index():
+    genre_id = request.args.get('genre_id', type=int)
     
     conn = get_db_connection()
-    films = conn.execute('SELECT * FROM films').fetchall()
+    # Recupera tutti i generi per il filtro
+    genres = conn.execute('SELECT * FROM genres ORDER BY name').fetchall()
+    
+    # Costruisci la query in base alla presenza del filtro per genere
+    if genre_id:
+        films = conn.execute('''
+            SELECT f.* FROM films f
+            JOIN film_genres fg ON f.id = fg.film_id
+            WHERE fg.genre_id = ?
+        ''', (genre_id,)).fetchall()
+    else:
+        films = conn.execute('SELECT * FROM films').fetchall()
+    
     conn.close()
-    return render_template('index.html', films=films)
+    return render_template('index.html', films=films, genres=genres, current_genre=genre_id)
+
+@app.route('/director/<int:director_id>')
+def director_films(director_id):
+    conn = get_db_connection()
+    director = conn.execute('SELECT * FROM directors WHERE id = ?', (director_id,)).fetchone()
+    films = conn.execute('''
+        SELECT * FROM films 
+        WHERE director_id = ?
+    ''', (director_id,)).fetchall()
+    conn.close()
+    
+    if not director:
+        flash('Regista non trovato')
+        return redirect(url_for('index'))
+    
+    return render_template('director_films.html', director=director, films=films)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -64,8 +93,28 @@ def logout():
 @app.route('/film/<int:film_id>', methods=['GET', 'POST'])
 def film_detail(film_id):
     conn = get_db_connection()
-    film = conn.execute('SELECT * FROM films WHERE id = ?', (film_id,)).fetchone()
-    reviews = conn.execute('SELECT r.*, u.username FROM reviews r JOIN users u ON r.user_id = u.id WHERE film_id = ?', (film_id,)).fetchall()
+    # Recupera il film con il nome del regista
+    film = conn.execute('''
+        SELECT f.*, d.id as director_id, d.name as director_name 
+        FROM films f
+        JOIN directors d ON f.director_id = d.id
+        WHERE f.id = ?
+    ''', (film_id,)).fetchone()
+    
+    # Recupera i generi del film
+    genres = conn.execute('''
+        SELECT g.name FROM genres g
+        JOIN film_genres fg ON g.id = fg.genre_id
+        WHERE fg.film_id = ?
+    ''', (film_id,)).fetchall()
+    
+    # Recupera le recensioni
+    reviews = conn.execute('''
+        SELECT r.*, u.username 
+        FROM reviews r 
+        JOIN users u ON r.user_id = u.id 
+        WHERE film_id = ?
+    ''', (film_id,)).fetchall()
     
     if request.method == 'POST':
         if 'user_id' not in session:
@@ -74,12 +123,14 @@ def film_detail(film_id):
         review_text = request.form['review']
         rating = request.form['rating']
         user_id = session['user_id']
-        conn.execute('INSERT INTO reviews (film_id, user_id, review, rating) VALUES (?, ?, ?, ?)', (film_id, user_id, review_text, rating))
+        conn.execute('INSERT INTO reviews (film_id, user_id, review, rating) VALUES (?, ?, ?, ?)', 
+                     (film_id, user_id, review_text, rating))
         conn.commit()
         conn.close()
         return redirect(url_for('film_detail', film_id=film_id))
+    
     conn.close()
-    return render_template('film.html', film=film, reviews=reviews)
+    return render_template('film.html', film=film, reviews=reviews, genres=genres)
 
 if __name__ == '__main__':
     app.run(debug=True,port=60001)

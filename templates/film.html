@@ -4,7 +4,24 @@
 <div class="card mb-3 small-card">
     <img src="{{ url_for('static', filename='favicon/' ~ film['image']) }}" class="card-img-bottom film-img" alt="{{ film['title'] }}">
     <div class="card-body">
-        {# Film title rimosso #}
+        <h3 class="card-title">{{ film['title'] }}</h3>
+        
+        <!-- Informazioni su regista e generi -->
+        <div class="mb-3">
+            <p>
+                <strong>Regista:</strong> 
+                <a href="{{ url_for('director_films', director_id=film['director_id']) }}">
+                    {{ film['director_name'] }}
+                </a>
+            </p>
+            <p>
+                <strong>Generi:</strong> 
+                {% for genre in genres %}
+                    <span class="badge bg-secondary">{{ genre['name'] }}</span>
+                {% endfor %}
+            </p>
+        </div>
+        
         <h4><b>Trama</b></h4><br>
         <p class="card-text">{{ film['description'] }}</p>
     </div>

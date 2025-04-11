@@ -3,7 +3,7 @@ import sqlite3
 conn = sqlite3.connect('database.db')
 c = conn.cursor()
 
-# Creazione tabelle
+# Creazione tabelle (aggiunte le tabelle per i registi e generi)
 c.execute('''
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -13,11 +13,37 @@ CREATE TABLE IF NOT EXISTS users (
 ''')
 
 c.execute('''
+CREATE TABLE IF NOT EXISTS directors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+)
+''')
+
+c.execute('''
+CREATE TABLE IF NOT EXISTS genres (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+)
+''')
+
+c.execute('''
 CREATE TABLE IF NOT EXISTS films (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     description TEXT,
-    image TEXT
+    image TEXT,
+    director_id INTEGER,
+    FOREIGN KEY(director_id) REFERENCES directors(id)
+)
+''')
+
+c.execute('''
+CREATE TABLE IF NOT EXISTS film_genres (
+    film_id INTEGER,
+    genre_id INTEGER,
+    PRIMARY KEY (film_id, genre_id),
+    FOREIGN KEY(film_id) REFERENCES films(id),
+    FOREIGN KEY(genre_id) REFERENCES genres(id)
 )
 ''')
 
@@ -33,30 +59,74 @@ CREATE TABLE IF NOT EXISTS reviews (
 )
 ''')
 
-# Inserimento di 7 film di esempio con immagini locali
-# Questi film vengono inseriti nel database. 
-# Nota: l'ordine di inserimento determina l'ID.
-films = [
-    ('Inception', "L'inizio di Inception (2010) di Christopher Nolan è intrigante e misterioso, gettando subito il pubblico in un mondo di sogni e realtà sfumate.Il film si apre con una scena che mostra Dom Cobb (Leonardo DiCaprio), un 'estrattore' che ruba segreti dai sogni delle persone. Cobb e il suo team sono in una villa, dove stanno cercando di estrarre informazioni dal subconscio di Saito (Ken Watanabe), un ricco uomo d'affari. Dopo un confronto intenso, Cobb viene catturato e portato davanti a Saito, che lo offre un incarico molto più grande.Saito gli chiede di fare l'opposto dell'estrazione: inserire un'idea nel subconscio di una persona, un processo chiamato 'inception'. La persona da influenzare è Robert Fischer (Cillian Murphy), il giovane erede di un impero industriale, e l'idea da impiantare è che debba smantellare l'impero del padre. Se Cobb riesce in questa impresa, Saito gli promette di cancellare il suo passato criminale, permettendogli di tornare a casa e riunirsi con i suoi figli.Da lì, il film si sviluppa in un gioco di realtà e sogno, in cui Cobb e il suo team devono progettare un 'sogno dentro un sogno' e affrontare pericoli sempre più complessi mentre navigano nel subconscio di Fischer. Il film gioca con la percezione della realtà e le leggi del tempo, creando una trama piena di colpi di scena.", 'inception.png'),
-    ('The Matrix', "L'inizio di The Matrix (1999) è un mix di azione e mistero che introduce il pubblico nell’universo cyberpunk del film.Si apre con una schermata di codice verde su sfondo nero, che rappresenta il sistema della Matrix, seguita da una conversazione telefonica tra Trinity (Carrie-Anne Moss) e Cypher. Subito dopo, vediamo Trinity in una stanza buia, circondata da agenti di polizia. Gli agenti la considerano una semplice hacker, ma quando cercano di arrestarla, dimostra abilità sovrumane: combatte con mosse spettacolari e fugge sui tetti, inseguita dall’Agente Smith e dagli altri Agenti, che sembrano avere poteri straordinari.Dopo una fuga rocambolesca, Trinity riesce a scappare all'ultimo momento grazie all’aiuto di Morpheus, il misterioso leader di un gruppo di ribelli.La scena si sposta poi sul protagonista, Thomas Anderson, un programmatore di giorno e hacker di notte, conosciuto online come Neo. È alla ricerca della verità sulla Matrix e viene contattato da Morpheus, che gli offre la possibilità di scoprire la vera natura del mondo in cui vive... e da lì inizia il viaggio che cambierà tutto.", 'thematrix.png'),
-    ('Interstellar', "L'inizio di Interstellar (2014) introduce un futuro distopico in cui la Terra sta diventando sempre più inabitabile a causa di cambiamenti climatici e crisi alimentari.Il film si apre con interviste in stile documentario di anziani che parlano di tempeste di polvere e delle difficoltà dell’epoca in cui hanno vissuto. Poi la storia si sposta su Cooper (Matthew McConaughey), un ex pilota della NASA diventato agricoltore, che vive in una fattoria con i suoi due figli, Murph e Tom, e il suocero Donald.Murph, la figlia più giovane, è particolarmente intelligente e curiosa. Dice a Cooper che nella sua stanza succedono cose strane: libri cadono dagli scaffali e si formano strani schemi di polvere sul pavimento. Cooper inizialmente pensa che sia solo immaginazione, ma poi scopre che gli schemi sono in realtà coordinate in codice binario. Seguendo queste coordinate, lui e Murph trovano una base segreta della NASA, dove il professor Brand (Michael Caine) e il suo team stanno cercando di trovare un modo per salvare l’umanità attraverso viaggi interstellari.Qui Cooper viene reclutato per una missione straordinaria: viaggiare attraverso un wormhole vicino a Saturno per cercare un nuovo pianeta abitabile, lasciando Murph devastata dal suo abbandono. Questo momento segna l’inizio di un viaggio epico attraverso lo spazio e il tempo.", 'interstellar.png'),
-    ('Titanic', "L'inizio di Titanic (1997) si svolge nel presente (nel 1996) e introduce la storia attraverso un flashback.Il film si apre con l'esploratore Brock Lovett (Bill Paxton) e il suo team a bordo della nave da ricerca Keldysh. Stanno cercando il prezioso diamante 'Cuore dell'Oceano' nei resti del Titanic, sommersi nell'Atlantico. Durante un'immersione con un sottomarino, trovano una cassaforte, ma all'interno non c'è il diamante, solo alcuni disegni. Uno di questi raffigura una giovane donna nuda che indossa proprio il gioiello.Questa immagine viene trasmessa in TV e attira l'attenzione di un'anziana donna, Rose Dawson Calvert (Gloria Stuart), che chiama Lovett sostenendo di essere la ragazza del disegno. Viene portata sulla nave e inizia a raccontare la sua storia, riportando il pubblico indietro nel tempo, al 10 aprile 1912, quando il Titanic salpava da Southampton per il suo tragico viaggio inaugurale.Da qui parte il vero cuore della storia, con la giovane Rose DeWitt Bukater (Kate Winslet), un'aristocratica infelice, e Jack Dawson (Leonardo DiCaprio), un artista squattrinato che vince il biglietto per il Titanic in una partita a poker. Il loro incontro e la loro storia d'amore si intrecciano con la drammatica vicenda del naufragio.", 'titanic.png'),
-    ('The Godfather', "L'inizio di The Godfather (Il Padrino, 1972) è una delle aperture più iconiche della storia del cinema.Il film si apre con un primo piano di Amerigo Bonasera, un impresario di pompe funebri, che dice la celebre frase: 'I believe in America.' Sta parlando con Don Vito Corleone (Marlon Brando), il potente capo della famiglia mafiosa Corleone, durante il matrimonio della figlia di Don Vito. Bonasera chiede giustizia per sua figlia, brutalmente aggredita da due giovani uomini che sono stati puniti con una pena lieve dal sistema giudiziario.Don Corleone ascolta, ma rifiuta di aiutarlo immediatamente perché Bonasera non si è mai mostrato leale nei suoi confronti. Dopo che Bonasera si umilia e giura fedeltà, Don Vito accetta di vendicarsi, ma gli ricorda che un giorno potrebbe chiedergli un favore in cambio.Questa scena introduce subito il mondo del film: un mix di onore, vendetta, potere e le rigide regole del crimine organizzato. Poi, la narrazione si sposta sulla festa di matrimonio della figlia del Don, Connie Corleone, dove vengono presentati gli altri membri della famiglia, inclusi Michael Corleone (Al Pacino), il figlio che cerca di restare fuori dagli affari di famiglia... almeno all'inizio.", 'thegodfather.png'),
-    ('Pulp Fiction', "L'inizio di Pulp Fiction (1994) di Quentin Tarantino presenta una struttura narrativa non lineare e si apre con una scena in una tavola calda.Due piccoli criminali, Pumpkin (Tim Roth) e Honey Bunny (Amanda Plummer), stanno facendo colazione e discutono di rapine. Dopo aver notato che le tavole calde sono luoghi facili da svaligiare rispetto alle banche o ai negozi di liquori, decidono di rapinarne una proprio in quel momento. La scena si interrompe bruscamente mentre tirano fuori le armi e iniziano l’assalto.Da qui, il film si sposta su altre storie interconnesse, introducendo Vincent Vega (John Travolta) e Jules Winnfield (Samuel L. Jackson), due sicari che lavorano per il boss Marsellus Wallace, e sviluppando una serie di eventi surreali, violenti e ironici.", 'pulpfiction.png'),
-    ('Fight Club', "All'inizio di Fight Club, il protagonista (che rimane senza nome) è un impiegato insoddisfatto e insonne che lavora per una grande compagnia automobilistica. Soffre di una grave insonnia e trova un rimedio temporaneo frequentando gruppi di supporto per malati terminali, dove riesce finalmente a sfogare le sue emozioni represse e dormire meglio.La sua vita cambia radicalmente quando incontra Tyler Durden, un carismatico e anarchico produttore di sapone, durante un volo. Dopo che il suo appartamento esplode misteriosamente, si trasferisce da Tyler in una casa fatiscente. Insieme, fondano il Fight Club, un circolo clandestino dove uomini insoddisfatti sfogano la loro frustrazione attraverso combattimenti brutali.Questo è solo l'inizio: da qui in poi la storia diventa sempre più oscura e caotica, con il protagonista che perde progressivamente il controllo della sua stessa vita.", 'fightclub.png'),
-    ("Forrest Gump", "L'inizio di Forrest Gump (1994) è iconico e commovente, con una narrazione che si snoda attraverso la vita del protagonista, Forrest Gump (Tom Hanks).Il film inizia con Forrest seduto su una panchina alla fermata dell'autobus, mentre racconta la sua storia a chiunque voglia ascoltarlo. La sua vita è stata straordinaria, ma lui stesso si considera un uomo semplice. La narrazione si sposta rapidamente indietro nel tempo, mostrando la sua infanzia in Alabama, dove vive con la madre (Sally Field) e affronta le sue difficoltà fisiche e mentali. Nonostante le sue limitazioni, Forrest dimostra di avere un cuore puro e una straordinaria capacità di affrontare le sfide della vita. La sua storia si intreccia con eventi storici significativi degli anni '60 e '70, rendendo il film un viaggio emozionante attraverso l'America.", 'forrestgump.png'),
-    ("The Shawshank Redemption", "L'inizio di The Shawshank Redemption (Le ali della libertà, 1994) è un'introduzione potente e malinconica alla storia di Andy Dufresne (Tim Robbins), un banchiere ingiustamente condannato per l'omicidio della moglie e del suo amante.Il film inizia con una narrazione in voice-over di Red (Morgan Freeman), un detenuto che racconta la sua vita nel penitenziario di Shawshank. La scena si sposta su Andy, che viene portato in prigione, visibilmente confuso e spaventato. La sua vita cambia radicalmente quando incontra Red, che diventa il suo amico e mentore. La storia si sviluppa attraverso gli anni, mostrando le ingiustizie e le brutalità del sistema carcerario, ma anche la speranza e la resilienza di Andy mentre cerca di mantenere viva la sua umanità.", 'shawshank.png'),
-    ("The Godfather Part II", "L'inizio di The Godfather Part II (Il Padrino - Parte II, 1974) è un capolavoro che continua la storia della famiglia Corleone, alternando il passato e il presente in modo magistrale.Il film si apre con una scena del giovane Vito Corleone (Robert De Niro) che arriva a New York dall'Italia nel 1901. La sua vita è segnata dalla povertà e dalla lotta per la sopravvivenza, ma dimostra subito di avere una mente acuta e una determinazione straordinaria. La narrazione si sposta poi su Michael Corleone (Al Pacino), ora a capo della famiglia, che cerca di espandere il potere della sua organizzazione mentre affronta tradimenti e nemici interni ed esterni. Questo dualismo tra passato e presente crea una tensione avvincente, mostrando come le scelte di Vito abbiano influenzato il destino di Michael.", 'godfather2.png'),
-    ("The Good,the Bad and the Ugly", "L'inizio di The Good, the Bad and the Ugly (Il buono, il brutto, il cattivo, 1966) è un classico del cinema western diretto da Sergio Leone. Il film si apre con una sequenza iconica che introduce i tre protagonisti: Blondie (il buono), Tuco (il brutto) e Angel Eyes (il cattivo).La scena iniziale mostra Blondie e Tuco che cercano di scappare da un gruppo di soldati confederati. La tensione cresce mentre Blondie tradisce Tuco, lasciandolo in balia dei soldati. Questo inizio stabilisce subito il tono del film, con la sua miscela di azione, umorismo e dramma. La colonna sonora di Ennio Morricone accompagna perfettamente le immagini, creando un'atmosfera unica e memorabile.", 'goodbadugly.png'),
-    ("Schindler's list", "L'inizio di Schindler's List (1993) è un potente e toccante racconto della Shoah, diretto da Steven Spielberg. Il film si apre con una scena in bianco e nero che mostra la vita degli ebrei a Cracovia durante l'occupazione nazista. La musica di John Williams accompagna le immagini, creando un'atmosfera di tristezza e disperazione. La storia segue Oskar Schindler (Liam Neeson), un imprenditore tedesco che inizialmente cerca solo di trarre profitto dalla guerra, ma che alla fine diventa un eroe salvando oltre mille ebrei dalla morte nei campi di concentramento. Questo inizio stabilisce il tono drammatico del film, preparando il pubblico a una storia di coraggio e umanità in mezzo all'orrore.", 'schindler.png'),
-    ("The Dark Knight", "L'inizio di The Dark Knight (2008) è un capolavoro del cinema supereroistico diretto da Christopher Nolan. Il film si apre con una sequenza mozzafiato che mostra una rapina in banca orchestrata dal Joker (Heath Ledger). La scena è intensa e frenetica, con il Joker che dimostra subito la sua natura imprevedibile e spietata. Dopo aver eliminato i suoi complici uno dopo l'altro, il Joker riesce a fuggire con il bottino, lasciando il pubblico in trepidante attesa. Questa introduzione stabilisce immediatamente il tono oscuro e teso del film, presentando il Joker come un antagonista formidabile e inquietante.", 'darkknight.png'),
-    ("Lord of the Rings: Return of the King", "L'inizio di The Lord of the Rings: The Return of the King (Il Signore degli Anelli: Il ritorno del re, 2003) è un epico e drammatico prologo che prepara il terreno per la conclusione della trilogia. Il film si apre con una sequenza che mostra la cattura di Gollum (Andy Serkis) da parte di Aragorn (Viggo Mortensen) e Legolas (Orlando Bloom). La scena è intensa e carica di tensione, mentre Gollum racconta la sua storia e il suo legame con l'Unico Anello. Questo inizio stabilisce immediatamente il tono epico del film, preparando il pubblico a un'avventura straordinaria attraverso la Terra di Mezzo.", 'lotrreturnking.png')
+# Inserimento dei generi
+genres = [
+    ('Azione',),
+    ('Commedia',),
+    ('Drammatico',),
+    ('Fantascienza',),
+    ('Horror',),
+    ('Thriller',),
+    ('Western',),
+    ('Romantico',),
+    ('Avventura',),
+    ('Animazione',)
 ]
-c.executemany('INSERT INTO films (title, description, image) VALUES (?, ?, ?)', films)
+c.executemany('INSERT INTO genres (name) VALUES (?)', genres)
 
-# Tentativo di cancellare i primi 7 film inseriti:
-# Questa query dovrebbe cancellare i film con i 7 ID più bassi (quelli appena inseriti).
-# Se la cancellazione non funziona, verificare l'ordinamento degli ID e i commit.
+# Inserimento dei registi
+directors = [
+    ('Christopher Nolan',),
+    ('Lana Wachowski',),
+    ('James Cameron',),
+    ('Francis Ford Coppola',),
+    ('Quentin Tarantino',),
+    ('David Fincher',),
+    ('Robert Zemeckis',),
+    ('Frank Darabont',),
+    ('Sergio Leone',),
+    ('Steven Spielberg',),
+    ('Peter Jackson',)
+]
+c.executemany('INSERT INTO directors (name) VALUES (?)', directors)
+
+# Inserimento dei film con i rispettivi registi
+films = [
+    ('Inception', "L'inizio di Inception (2010) di Christopher Nolan è intrigante e misterioso...", 'inception.png', 1),
+    ('The Matrix', "L'inizio di The Matrix (1999) è un mix di azione e mistero...", 'thematrix.png', 2),
+    ('Interstellar', "L'inizio di Interstellar (2014) introduce un futuro distopico...", 'interstellar.png', 1),
+    ('Titanic', "L'inizio di Titanic (1997) si svolge nel presente (nel 1996)...", 'titanic.png', 3),
+    ('The Godfather', "L'inizio di The Godfather (Il Padrino, 1972) è una delle aperture più iconiche...", 'thegodfather.png', 4),
+    ('Pulp Fiction', "L'inizio di Pulp Fiction (1994) di Quentin Tarantino presenta una struttura narrativa...", 'pulpfiction.png', 5),
+    ('Fight Club', "All'inizio di Fight Club, il protagonista (che rimane senza nome) è un impiegato insoddisfatto...", 'fightclub.png', 6),
+    ('Forrest Gump', "L'inizio di Forrest Gump (1994) è iconico e commovente...", 'forrestgump.png', 7),
+    ('The Shawshank Redemption', "L'inizio di The Shawshank Redemption (Le ali della libertà, 1994)...", 'shawshank.png', 8),
+    ('The Godfather Part II', "L'inizio di The Godfather Part II (Il Padrino - Parte II, 1974)...", 'godfather2.png', 4),
+    ('The Good,the Bad and the Ugly', "L'inizio di The Good, the Bad and the Ugly (Il buono, il brutto, il cattivo, 1966)...", 'goodbadugly.png', 9),
+    ('Schindler\'s list', "L'inizio di Schindler's List (1993) è un potente e toccante racconto...", 'schindler.png', 10),
+    ('The Dark Knight', "L'inizio di The Dark Knight (2008) è un capolavoro del cinema supereroistico...", 'darkknight.png', 1),
+    ('Lord of the Rings: Return of the King', "L'inizio di The Lord of the Rings: The Return of the King (2003)...", 'lotrreturnking.png', 11)
+]
+c.executemany('INSERT INTO films (title, description, image, director_id) VALUES (?, ?, ?, ?)', films)
+
+# Associazione dei film ai generi
+film_genres = [
+    (1, 1), (1, 6), (1, 4),  # Inception: Azione, Thriller, Fantascienza
+    (2, 1), (2, 4), (2, 6),  # The Matrix: Azione, Fantascienza, Thriller
+    (3, 4), (3, 3),          # Interstellar: Fantascienza, Drammatico
+    (4, 3), (4, 8),          # Titanic: Drammatico, Romantico
+    (5, 3), (5, 6),          # The Godfather: Drammatico, Thriller
+    (6, 3), (6, 6), (6, 2),  # Pulp Fiction: Drammatico, Thriller, Commedia
+    (7, 3), (7, 6),          # Fight Club: Drammatico, Thriller
+    (8, 3), (8, 2),          # Forrest Gump: Drammatico, Commedia
+    (9, 3),                  # The Shawshank Redemption: Drammatico
+    (10, 3), (10, 6),        # The Godfather Part II: Drammatico, Thriller
+    (11, 7), (11, 9),        # The Good,the Bad and the Ugly: Western, Avventura
+    (12, 3), (12, 5),        # Schindler's list: Drammatico, Horror
+    (13, 1), (13, 6),        # The Dark Knight: Azione, Thriller
+    (14, 9), (14, 4)         # Lord of the Rings: Avventura, Fantascienza
+]
+c.executemany('INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)', film_genres)
 
 conn.commit()
 conn.close()
