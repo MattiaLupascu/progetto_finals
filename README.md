@@ -45,7 +45,7 @@ erDiagram
     FILMS ||--o{ FILM_GENRES : "appartiene a"
     GENRES ||--o{ FILM_GENRES : "categorizza"
 ```
-
+```
 progetto_finals-1/
 ├── app.py                 # File principale dell'applicazione Flask
 ├── database.db            # Database SQLite
@@ -67,3 +67,4 @@ progetto_finals-1/
     ├── director_films.html # Pagina con i film di un regista
     ├── login.html         # Pagina di login
     └── register.html      # Pagina di registrazione
+```
