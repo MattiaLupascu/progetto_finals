@@ -3,32 +3,52 @@
 {% block content %}
 <h1>Film in vetrina</h1>
 
-<!-- Filtri per genere -->
+<!-- Filtri per genere con data-genre-id per AJAX -->
 <div class="mb-4">
     <h5>Filtra per genere:</h5>
     <div class="btn-group">
-        <a href="{{ url_for('index') }}" class="btn btn-outline-primary {% if not current_genre %}active{% endif %}">Tutti</a>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-primary genre-filter-btn {% if not current_genre %}active{% endif %}" data-genre-id="">Tutti</a>
         {% for genre in genres %}
         <a href="{{ url_for('index', genre_id=genre.id) }}" 
-           class="btn btn-outline-primary {% if current_genre == genre.id %}active{% endif %}">
+           class="btn btn-outline-primary genre-filter-btn {% if current_genre == genre.id %}active{% endif %}"
+           data-genre-id="{{ genre.id }}">
             {{ genre.name }}
         </a>
         {% endfor %}
     </div>
 </div>
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    {% for film in films %}
-    <div class="col">
-        <div class="card h-100">
-            <a href="{{ url_for('film_detail', film_id=film['id']) }}">
-                <img src="{{ url_for('static', filename='favicon/' ~ film['image']) }}" class="card-img-bottom layout-img" alt="{{ film['title'] }}">
-            </a>
-            <div class="card-body">
-                <h5 class="card-title text-center">{{ film['title'] }}</h5>
+<!-- Contenitore dei film con ID per AJAX -->
+<div id="film-container">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for film in films %}
+        <div class="col">
+            <div class="card h-100">
+                <a href="{{ url_for('film_detail', film_id=film['id']) }}">
+                    <img src="{{ url_for('static', filename='favicon/' ~ film['image']) }}" class="card-img-bottom layout-img" alt="{{ film['title'] }}">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title text-center">{{ film['title'] }}</h5>
+                    <div class="text-center mt-2">
+                        <div class="review-score">
+                            {% if film['avg_rating'] %}
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-star-fill"></i> 
+                                    {{ "%.1f"|format(film['avg_rating']) }} 
+                                    ({{ film['review_count'] }} recensioni)
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">Nessuna recensione</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
+
+<!-- Includi il file JavaScript per il filtro AJAX -->
+<script src="{{ url_for('static', filename='scripts/filter.js') }}"></script>
 {% endblock %}

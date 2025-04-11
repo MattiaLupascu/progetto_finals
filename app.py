@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import sqlite3
 
 app = Flask(__name__)
@@ -22,15 +22,62 @@ def index():
     # Costruisci la query in base alla presenza del filtro per genere
     if genre_id:
         films = conn.execute('''
-            SELECT f.* FROM films f
+            SELECT f.*, AVG(r.rating) as avg_rating, COUNT(r.id) as review_count 
+            FROM films f
             JOIN film_genres fg ON f.id = fg.film_id
+            LEFT JOIN reviews r ON f.id = r.film_id
             WHERE fg.genre_id = ?
+            GROUP BY f.id
         ''', (genre_id,)).fetchall()
     else:
-        films = conn.execute('SELECT * FROM films').fetchall()
+        films = conn.execute('''
+            SELECT f.*, AVG(r.rating) as avg_rating, COUNT(r.id) as review_count 
+            FROM films f
+            LEFT JOIN reviews r ON f.id = r.film_id
+            GROUP BY f.id
+        ''').fetchall()
     
     conn.close()
     return render_template('index.html', films=films, genres=genres, current_genre=genre_id)
+
+@app.route('/ajax/films')
+def ajax_films():
+    """Endpoint AJAX per ottenere i film filtrati per genere"""
+    genre_id = request.args.get('genre_id', type=int)
+    
+    conn = get_db_connection()
+    
+    # Costruisci la query in base alla presenza del filtro per genere
+    if genre_id:
+        films = conn.execute('''
+            SELECT f.*, AVG(r.rating) as avg_rating, COUNT(r.id) as review_count 
+            FROM films f
+            JOIN film_genres fg ON f.id = fg.film_id
+            LEFT JOIN reviews r ON f.id = r.film_id
+            WHERE fg.genre_id = ?
+            GROUP BY f.id
+        ''', (genre_id,)).fetchall()
+    else:
+        films = conn.execute('''
+            SELECT f.*, AVG(r.rating) as avg_rating, COUNT(r.id) as review_count 
+            FROM films f
+            LEFT JOIN reviews r ON f.id = r.film_id
+            GROUP BY f.id
+        ''').fetchall()
+    
+    # Converti i risultati in un formato JSON-serializzabile
+    film_list = []
+    for film in films:
+        film_dict = dict(film)
+        # Formatta il punteggio medio per il JSON
+        if film_dict['avg_rating'] is not None:
+            film_dict['avg_rating'] = round(film_dict['avg_rating'], 1)
+        else:
+            film_dict['avg_rating'] = 0
+        film_list.append(film_dict)
+    
+    conn.close()
+    return jsonify({'films': film_list})
 
 @app.route('/director/<int:director_id>')
 def director_films(director_id):
@@ -93,12 +140,15 @@ def logout():
 @app.route('/film/<int:film_id>', methods=['GET', 'POST'])
 def film_detail(film_id):
     conn = get_db_connection()
-    # Recupera il film con il nome del regista
+    # Recupera il film con il nome del regista e il punteggio medio
     film = conn.execute('''
-        SELECT f.*, d.id as director_id, d.name as director_name 
+        SELECT f.*, d.id as director_id, d.name as director_name,
+               AVG(r.rating) as avg_rating, COUNT(r.id) as review_count
         FROM films f
         JOIN directors d ON f.director_id = d.id
+        LEFT JOIN reviews r ON f.id = r.film_id
         WHERE f.id = ?
+        GROUP BY f.id
     ''', (film_id,)).fetchone()
     
     # Recupera i generi del film

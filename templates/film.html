@@ -6,6 +6,21 @@
     <div class="card-body">
         <h3 class="card-title">{{ film['title'] }}</h3>
         
+        <!-- Aggiunto il punteggio medio delle recensioni -->
+        <div class="mb-3">
+            <h4>Valutazione Media: 
+                {% if film['avg_rating'] %}
+                    <span class="badge bg-primary">
+                        <i class="bi bi-star-fill"></i> 
+                        {{ "%.1f"|format(film['avg_rating']) }} 
+                        su 5 ({{ film['review_count'] }} recensioni)
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary">Nessuna recensione</span>
+                {% endif %}
+            </h4>
+        </div>
+        
         <!-- Informazioni su regista e generi -->
         <div class="mb-3">
             <p>

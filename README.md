@@ -58,8 +58,10 @@ progetto_finals-1/
 │   │   ├── interstellar.png
 │   │   ├── ...
 │   │   └── immaginesottomarino.png
-│   └── styles/
-│       └── style.css      # Fogli di stile CSS
+│   ├── styles/
+│   |    └── style.css      # Fogli di stile CSS
+|   └── scripts/
+|       └── filter.js       # Javascript per il filtro
 └── templates/
     ├── layout.html        # Template base per tutte le pagine
     ├── index.html         # Homepage con lista film e filtri per genere
