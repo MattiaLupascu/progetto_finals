@@ -12,8 +12,7 @@
 <body>
     <nav>
         <div class="nav-buttons">
-            <h1>Submarinium</h1><br>
-            <a href="{{ url_for('index') }}" class="btn-nav">Home</a>
+            <a href="{{ url_for('index') }}" class="btn-nav brand-logo">Submarinium</a>
             {% if session.get('username') %}
                 <a href="{{ url_for('logout') }}" class="btn-nav">Logout</a>
                 <span>Benvenuto, {{ session.username }}</span>

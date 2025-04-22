@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block title %}Debug - Film Database{% endblock %}
+{% block content %}
+<h1>Debug - Dati del Database</h1>
+
+<h2>Films ({{ films|length }})</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Image</th>
+            <th>Director</th>
+            <th>Avg Rating</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for film in films %}
+        <tr>
+            <td>{{ film.id }}</td>
+            <td>{{ film.title }}</td>
+            <td>{{ film.image }}</td>
+            <td>{{ film.director_name }}</td>
+            <td>{{ film.avg_rating }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Genres ({{ genres|length }})</h2>
+<ul>
+    {% for genre in genres %}
+    <li>{{ genre.id }}: {{ genre.name }}</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
