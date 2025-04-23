@@ -7,10 +7,11 @@
 <div class="mb-4">
     <h5>Filtra per genere:</h5>
     <div class="btn-group flex-wrap">
-        <a href="{{ url_for('index') }}" class="btn btn-outline-primary {% if not current_genre %}active{% endif %}">Tutti</a>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-primary genre-filter-btn {% if not current_genre %}active{% endif %}" data-genre-id="">Tutti</a>
         {% for genre in genres %}
         <a href="{{ url_for('index', genre_id=genre.id) }}" 
-           class="btn btn-outline-primary {% if current_genre == genre.id %}active{% endif %}">
+           class="btn btn-outline-primary genre-filter-btn {% if current_genre == genre.id %}active{% endif %}"
+           data-genre-id="{{ genre.id }}">
             {{ genre.name }}
         </a>
         {% endfor %}
@@ -18,7 +19,7 @@
 </div>
 
 <!-- Contenitore dei film semplificato -->
-<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+<div id="film-container" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
     {% for film in films %}
     <div class="col">
         <div class="card h-100">

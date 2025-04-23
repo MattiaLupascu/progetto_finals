@@ -48,35 +48,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Crea il contenuto HTML per i film
-        let html = '<div class="row row-cols-1 row-cols-md-3 g-4">';
+        let html = '';
         
         films.forEach(film => {
             html += `
                 <div class="col">
                     <div class="card h-100">
-                        <a href="/film/${film.id}">
-                            <img src="/static/favicon/${film.image}" class="card-img-bottom layout-img" alt="${film.title}">
+                        <a href="/film/${film.id}" class="card-img-link">
+                            ${film.image ? 
+                                `<img src="/static/favicon/${film.image}" class="card-img-top" alt="${film.title}">` : 
+                                '<div class="no-image">Nessuna immagine</div>'
+                            }
                         </a>
                         <div class="card-body">
-                            <h5 class="card-title text-center">${film.title}</h5>
-                            <div class="text-center mt-2">
-                                <div class="review-score">
-                                    ${film.avg_rating > 0 ? 
-                                    `<span class="badge bg-primary">
-                                        <i class="bi bi-star-fill"></i> 
-                                        ${film.avg_rating.toFixed(1)} 
-                                        (${film.review_count} recensioni)
-                                    </span>` : 
-                                    '<span class="badge bg-secondary">Nessuna recensione</span>'}
-                                </div>
-                            </div>
+                            <h5 class="card-title">${film.title}</h5>
+                            <p class="text-muted">${film.director_name}</p>
+                            ${film.avg_rating ? 
+                                `<div class="rating">
+                                    <span class="badge bg-primary">${film.avg_rating.toFixed(1)} ⭐</span>
+                                </div>` : 
+                                ''
+                            }
                         </div>
                     </div>
                 </div>
             `;
         });
         
-        html += '</div>';
         filmContainer.innerHTML = html;
     }
 });
