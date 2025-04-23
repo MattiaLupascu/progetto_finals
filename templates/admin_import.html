@@ -23,13 +23,14 @@
         
         <form method="post" class="mt-4">
             <div class="mb-3">
-                <label for="num_pages" class="form-label">Numero di pagine da importare (max 5):</label>
+                <label for="num_pages" class="form-label">Numero di pagine da importare (max 20):</label>
                 <select class="form-select" id="num_pages" name="num_pages">
                     <option value="1">1 (circa 20 film)</option>
                     <option value="2">2 (circa 40 film)</option>
-                    <option value="3">3 (circa 60 film)</option>
-                    <option value="4">4 (circa 80 film)</option>
                     <option value="5">5 (circa 100 film)</option>
+                    <option value="10">10 (circa 200 film)</option>
+                    <option value="15">15 (circa 300 film)</option>
+                    <option value="20">20 (circa 400 film)</option>
                 </select>
                 <div class="form-text">Ogni pagina contiene circa 20 film. L'importazione potrebbe richiedere tempo.</div>
             </div>
@@ -45,24 +46,23 @@
             <h5><i class="bi bi-exclamation-triangle"></i> Attenzione!</h5>
             <p>L'importazione potrebbe richiedere diversi minuti, a seconda del numero di pagine selezionate. 
             Non chiudere questa finestra durante l'importazione.</p>
+            <p>Scegliere un numero elevato di pagine richiederà più tempo e spazio su disco. Se riscontri problemi, 
+            prova a importare meno pagine alla volta.</p>
         </div>
     </div>
 </div>
 
 <div class="card">
     <div class="card-header">
-        <h3 class="mb-0">Informazioni sull'API</h3>
+        <h3 class="mb-0">Informazioni sul Database</h3>
     </div>
     <div class="card-body">
-        <p>I dati dei film vengono forniti da <a href="https://www.themoviedb.org" target="_blank">The Movie Database (TMDB)</a>,
-        un database comunitario di film e serie TV.</p>
-        <p>Per ogni film vengono importate le seguenti informazioni:</p>
+        <p>SQLite non ha limiti pratici sul numero di film che puoi memorizzare. I limiti teorici sono:</p>
         <ul>
-            <li>Titolo e descrizione</li>
-            <li>Locandina</li>
-            <li>Regista</li>
-            <li>Generi</li>
+            <li>Dimensione massima database: fino a 140 terabyte</li>
+            <li>Numero massimo di righe: praticamente illimitato (2^64)</li>
         </ul>
+        <p>I limiti reali dipendono dallo spazio su disco e dalla memoria disponibile del tuo sistema.</p>
     </div>
 </div>
 {% endblock %}

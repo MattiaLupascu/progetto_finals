@@ -3,6 +3,17 @@
 {% block content %}
 <h1>Film in vetrina</h1>
 
+<!-- Aggiungi la barra di ricerca -->
+<div class="search-container mb-4">
+    <div class="input-group">
+        <input type="text" id="film-search" class="form-control" placeholder="Cerca un film...">
+        <button class="btn btn-primary" id="search-btn">
+            <i class="bi bi-search"></i> Cerca
+        </button>
+    </div>
+    <div id="search-status" class="text-muted mt-1 small"></div>
+</div>
+
 <!-- Filtri per genere semplificati -->
 <div class="mb-4">
     <h5>Filtra per genere:</h5>

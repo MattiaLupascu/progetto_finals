@@ -1,8 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Ottieni tutti i pulsanti del filtro per genere
     const genreButtons = document.querySelectorAll('.genre-filter-btn');
+    const searchInput = document.getElementById('film-search');
+    const searchButton = document.getElementById('search-btn');
+    const searchStatus = document.getElementById('search-status');
     
-    // Aggiungi event listener per ogni pulsante
+    // Variabile per tenere traccia del timer per il debounce
+    let searchTimer;
+    
+    // Aggiungi event listener per ogni pulsante di genere
     genreButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
@@ -25,6 +31,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             window.history.pushState({}, '', url);
             
+            // Resetta il campo di ricerca
+            if (searchInput) searchInput.value = '';
+            if (searchStatus) searchStatus.textContent = '';
+            
             // Esegui la chiamata AJAX per ottenere i film filtrati
             fetch(`/ajax/films${genreId ? '?genre_id=' + genreId : ''}`)
                 .then(response => response.json())
@@ -36,6 +46,69 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     });
+
+    // Funzione di ricerca films
+    function searchFilms(query) {
+        if (query.length < 2) {
+            searchStatus.textContent = 'Inserisci almeno 2 caratteri per iniziare la ricerca';
+            return;
+        }
+        
+        searchStatus.textContent = 'Ricerca in corso...';
+        
+        fetch(`/ajax/search?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                updateFilmDisplay(data.films);
+                searchStatus.textContent = data.status;
+                
+                // Resetta il filtro per genere attivo
+                genreButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.genre-filter-btn[data-genre-id=""]').classList.add('active');
+            })
+            .catch(error => {
+                console.error('Error searching films:', error);
+                searchStatus.textContent = 'Errore durante la ricerca';
+            });
+    }
+    
+    // Event listener per il pulsante di ricerca
+    if (searchButton) {
+        searchButton.addEventListener('click', function() {
+            if (searchInput) {
+                searchFilms(searchInput.value.trim());
+            }
+        });
+    }
+    
+    // Event listener per la ricerca durante la digitazione (con debounce)
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimer);
+            
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                searchStatus.textContent = 'Inserisci almeno 2 caratteri per iniziare la ricerca';
+                return;
+            }
+            
+            // Imposta un timer per evitare troppe richieste durante la digitazione
+            searchStatus.textContent = 'Digita per cercare...';
+            searchTimer = setTimeout(() => {
+                searchFilms(query);
+            }, 500); // Aspetta 500ms dopo l'ultima digitazione
+        });
+        
+        // Event listener per il tasto Invio nel campo di ricerca
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchTimer);
+                searchFilms(this.value.trim());
+            }
+        });
+    }
     
     // Funzione per aggiornare la visualizzazione dei film
     function updateFilmDisplay(films) {
@@ -43,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Se non ci sono film da mostrare
         if (films.length === 0) {
-            filmContainer.innerHTML = '<div class="alert alert-info">Nessun film trovato per questo genere.</div>';
+            filmContainer.innerHTML = '<div class="alert alert-info">Nessun film trovato per i criteri specificati.</div>';
             return;
         }
         

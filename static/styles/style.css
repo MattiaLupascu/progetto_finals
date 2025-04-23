@@ -202,3 +202,17 @@ nav a {
     color: #666;
     font-style: italic;
 }
+
+.search-container {
+    margin-bottom: 1.5rem;
+}
+
+#search-status {
+    font-style: italic;
+    color: #6c757d;
+    min-height: 1.5rem;
+}
+
+.input-group .btn {
+    z-index: 0;
+}

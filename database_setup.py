@@ -118,6 +118,8 @@ def import_movies_from_tmdb(conn, num_pages=1):
     
     movies_imported = 0
     
+    # Rimuoviamo la limitazione artificiale sul numero di pagine
+    # Il limite ora è controllato dal parametro passato dalla funzione chiamante
     for page in range(1, num_pages + 1):
         print(f"Elaborazione pagina {page} di {num_pages}...")
         movies_data = get_movies_from_api(page=page)
@@ -307,9 +309,9 @@ if film_count == 0:
     # Crea generi e registi predefiniti
     create_default_genres_and_directors()
     
-    # Esegui automaticamente l'importazione da TMDB all'avvio
+    # Aumentiamo il numero di pagine predefinito per l'importazione automatica
     print("Nessun film trovato nel database. Avvio importazione automatica da TMDB...")
-    films_imported = import_movies_from_tmdb(conn, num_pages=2)  # Importa 2 pagine (circa 40 film)
+    films_imported = import_movies_from_tmdb(conn, num_pages=5)  # Importa 5 pagine (circa 100 film)
     print(f"Importazione automatica completata: {films_imported} film importati.")
 else:
     print("Ci sono già film nel database. L'importazione automatica è stata saltata.")

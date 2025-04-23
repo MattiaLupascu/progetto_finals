@@ -119,6 +119,58 @@ def ajax_films():
     conn.close()
     return jsonify({'films': film_list})
 
+@app.route('/ajax/search')
+def ajax_search_films():
+    """Endpoint AJAX per cercare film per titolo (con fuzzy matching)"""
+    search_query = request.args.get('query', '').strip().lower()
+    
+    if not search_query or len(search_query) < 2:
+        return jsonify({
+            'films': [],
+            'status': 'Inserisci almeno 2 caratteri per iniziare la ricerca'
+        })
+    
+    conn = get_db_connection()
+    
+    # Utilizziamo LIKE con % per fare un fuzzy matching basilare
+    # Cerchiamo la stringa ovunque nel titolo
+    search_pattern = f"%{search_query}%"
+    
+    films = conn.execute('''
+        SELECT f.*, d.name as director_name, AVG(r.rating) as avg_rating, COUNT(r.id) as review_count 
+        FROM films f
+        LEFT JOIN directors d ON f.director_id = d.id
+        LEFT JOIN reviews r ON f.id = r.film_id
+        WHERE LOWER(f.title) LIKE ?
+        GROUP BY f.id
+        ORDER BY 
+            CASE 
+                WHEN LOWER(f.title) = ? THEN 1  -- Corrispondenza esatta (massima priorità)
+                WHEN LOWER(f.title) LIKE ? THEN 2  -- Inizia con la query
+                ELSE 3  -- Contiene la query ovunque
+            END,
+            f.title
+    ''', (search_pattern, search_query, f"{search_query}%")).fetchall()
+    
+    # Converti i risultati in un formato JSON-serializzabile
+    film_list = []
+    for film in films:
+        film_dict = dict(film)
+        # Formatta il punteggio medio per il JSON
+        if film_dict['avg_rating'] is not None:
+            film_dict['avg_rating'] = round(film_dict['avg_rating'], 1)
+        else:
+            film_dict['avg_rating'] = 0
+        film_list.append(film_dict)
+    
+    status_message = f"Trovati {len(film_list)} risultati per '{search_query}'"
+    
+    conn.close()
+    return jsonify({
+        'films': film_list,
+        'status': status_message
+    })
+
 @app.route('/director/<int:director_id>')
 def director_films(director_id):
     conn = get_db_connection()
@@ -247,8 +299,11 @@ def admin_import_movies():
     if request.method == 'POST':
         try:
             num_pages = int(request.form.get('num_pages', 1))
-            if num_pages < 1 or num_pages > 5:
-                num_pages = 1  # Limita a 5 pagine per sicurezza
+            # Aumentiamo il limite massimo di pagine da 5 a 20
+            if num_pages < 1:
+                num_pages = 1
+            elif num_pages > 20:
+                num_pages = 20  # Permette fino a circa 400 film
             
             # Esegue l'importazione usando la funzione spostata in database_setup.py
             conn = get_db_connection()
