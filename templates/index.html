@@ -16,7 +16,7 @@
 
 <!-- Filtri per genere semplificati -->
 <div class="mb-4">
-    <h5>Filtra per generi:</h5>
+    <h5>Filtra per genere:</h5>
     <div class="btn-group flex-wrap">
         <a href="{{ url_for('index') }}" class="btn btn-outline-primary genre-filter-btn {% if not current_genre %}active{% endif %}" data-genre-id="">Tutti</a>
         {% for genre in genres %}
