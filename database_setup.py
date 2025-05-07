@@ -51,10 +51,13 @@ def get_movie_details(movie_id, language="it-IT"):
         return None
 
 def download_poster(poster_path, save_dir="static/favicon"):
-    """Scarica il poster del film"""
+    """Scarica il poster del film nella directory favicon"""
     if not poster_path:
         print("Nessun poster path fornito")
         return None
+    
+    # Forza il salvataggio nella directory 'static/favicon'
+    save_dir = "static/favicon"
     
     # Crea la directory se non esiste
     if not os.path.exists(save_dir):
