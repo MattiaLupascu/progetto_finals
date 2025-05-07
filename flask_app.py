@@ -3,15 +3,32 @@ import sqlite3
 import sys
 import os
 
+# Try to import git, but handle the case where it's not installed
+try:
+    import git
+    GIT_AVAILABLE = True
+except ImportError:
+    GIT_AVAILABLE = False
+    print("Warning: 'git' module not found. The webhook functionality will be limited.")
+
+# Definisci i percorsi assoluti per il progetto
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, 'database.db')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+POSTER_DIR = os.path.join(STATIC_DIR, 'posters')
+
+# Assicurati che le directory esistano
+os.makedirs(POSTER_DIR, exist_ok=True)
+
 # Aggiungi la directory corrente al path per poter importare database_setup
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 from database_setup import import_movies_from_tmdb
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            static_folder=STATIC_DIR,  # Definisci esplicitamente la cartella static
+            static_url_path='/static')  # E il percorso URL per accedervi
 app.secret_key = 'la_tua_chiave_segreta'  # Cambia in produzione
 app.config['SESSION_PERMANENT'] = False  # Disabilita la persistenza della sessione
-
-DATABASE = 'database.db'
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
@@ -305,7 +322,7 @@ def admin_import_movies():
             elif num_pages > 20:
                 num_pages = 20  # Permette fino a circa 400 film
             
-            # Esegue l'importazione usando la funzione spostata in database_setup.py
+            # Utilizziamo esplicitamente la connessione con percorso assoluto
             conn = get_db_connection()
             import_movies_from_tmdb(conn, num_pages)
             conn.close()
@@ -344,6 +361,24 @@ def debug():
     conn.close()
     
     return render_template('debug.html', films=films, genres=genres)
+
+@app.route('/update_server', methods=['POST'])
+def webhook():
+    if request.method == 'POST':
+        if GIT_AVAILABLE:
+            try:
+                # Usa il percorso assoluto della repository
+                repo = git.Repo(BASE_DIR)
+                origin = repo.remotes.origin
+                origin.pull()
+                return 'Updated PythonAnywhere successfully', 200
+            except Exception as e:
+                return f'Error during git pull: {str(e)}', 500
+        else:
+            return 'Git functionality unavailable - module not installed', 503
+    else:
+        return 'Wrong event type', 400
+
 
 if __name__ == '__main__':
     app.run(debug=True,port=60001)

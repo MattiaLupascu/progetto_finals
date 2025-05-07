@@ -3,11 +3,18 @@ import requests
 import time
 import os
 import shutil
+from pathlib import Path
 
-# Assicuriamoci che la directory favicon esista
-os.makedirs('static/favicon', exist_ok=True)
+# Definisco il percorso base del progetto
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, 'database.db')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+POSTER_DIR = os.path.join(STATIC_DIR, 'posters')
 
-conn = sqlite3.connect('database.db')
+# Assicurati che le directory esistano
+os.makedirs(POSTER_DIR, exist_ok=True)
+
+conn = sqlite3.connect(DATABASE)
 c = conn.cursor()
 
 # Configurazione API TMDB
@@ -51,7 +58,7 @@ def get_movie_details(movie_id, language="it-IT"):
         return None
 
 def download_poster(poster_path, save_dir="static/favicon"):
-    """Scarica il poster del film nella directory favicon"""
+    """Scarica il poster del film"""
     if not poster_path:
         print("Nessun poster path fornito")
         return None
@@ -107,8 +114,13 @@ def create_default_genres_and_directors():
     conn.commit()
     print(f"Inseriti {len(default_genres)} generi predefiniti")
 
-def import_movies_from_tmdb(conn, num_pages=1):
+def import_movies_from_tmdb(conn=None, num_pages=1):
     """Importa film da TMDB nel database"""
+    # Se non è stata passata una connessione, creane una nuova
+    if conn is None:
+        conn = sqlite3.connect(DATABASE)
+        conn.row_factory = sqlite3.Row
+    
     c = conn.cursor()
     
     # Recupera i generi esistenti
@@ -161,7 +173,7 @@ def import_movies_from_tmdb(conn, num_pages=1):
             # Se non c'è l'immagine, usa un'immagine di default
             if not image_filename:
                 image_filename = "default_movie.png"
-                default_path = f"static/favicon/{image_filename}"
+                default_path = f"{POSTER_DIR}/{image_filename}"
                 if not os.path.exists(default_path):
                     # Crea un'immagine segnaposto se non esiste
                     with open(default_path, "w") as f:
