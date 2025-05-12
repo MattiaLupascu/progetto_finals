@@ -5,13 +5,13 @@ import os
 import shutil
 from pathlib import Path
 
-# Definisco il percorso base del progetto
+# Percorsi assoluti del progetto
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, 'database.db')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 POSTER_DIR = os.path.join(STATIC_DIR, 'posters')
 
-# Assicurati che le directory esistano
+# Crea le directory se non esistono
 os.makedirs(POSTER_DIR, exist_ok=True)
 
 conn = sqlite3.connect(DATABASE)
